@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import sys
+import traceback
 import os
 import re
 import json
@@ -12,12 +13,11 @@ from irc.client import ip_numstr_to_quad, ip_quad_to_numstr
 from inspect import getmembers, isfunction
 
 class SpaceBot( irc.bot.SingleServerIRCBot ):
-	def __init__( self, settings ):
-		self.settings = settings
+	def __init__( self, data ):
+		self.data = data
 		self.modules = {}
 		self.modulenames = []
 		self.modulecommands = []
-		self.lastFMApiKey = settings[ "lastfmapikey" ]
 		self.reloadModules()
 		self._rfc_1459_command_regexp = re.compile( r"^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?" )
 		
@@ -25,17 +25,17 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 			self,
 			[
 				irc.bot.ServerSpec(
-					settings[ "server" ],
-					int( settings[ "port" ] ),
-					settings[ "password" ]
+					self.data[ "settings" ][ "server" ],
+					int( self.data[ "settings" ][ "port" ] ),
+					self.data[ "settings" ][ "password" ]
 				)
 			],
-			settings[ "nickname" ],
+			self.data[ "settings" ][ "nickname" ],
 			"SpaceBot",
 			10
 		)
 		
-		self.connection.username = settings[ "username" ]
+		self.connection.username = self.data[ "settings" ][ "username" ]
 	
 	def privmsg( self, target, message ):
 		timestamp = datetime.datetime.utcnow()
@@ -52,24 +52,29 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 	def hasPermission( self, user, target, level ):
 		return True
 		
-		if hasattr( self, "permissions" ):
-			if "__OWNER__" in self.permissions:
-				if user == self.permissions[ "__OWNER__" ]:
+		if "permission" in self.data:
+			if "__OWNER__" in self.data[ "permissions" ]:
+				if user == self.data[ "permissions" ][ "__OWNER__" ]:
 					return True
 
-			if target in self.permissions:
-				if user in self.permissions[ target ]:
-					if self.permissions[ target ][ user ] >= level:
+			if target in self.data[ "permissions" ]:
+				if user in self.data[ "permissions" ][ target ]:
+					if self.data[ "permissions" ][ target ][ user ] >= level:
 						return True
 		
 		self.notice( user, "Check your privilege :^)" )
 		
 		return False
 	
+	def saveData( self ):
+		datafile = open( "data.json",'w' )
+		datafile.write( json.dumps( self.data, sort_keys = True, indent = 4, separators = ( ",", ": " ) ) )
+		datafile.close()
+
 	def on_welcome( self, c, e ):
-		if "nickpass" in self.settings:
-			if self.settings[ "nickpass" ] != None and self.settings[ "nickpass" ] != "":
-				c.privmsg( "NickServ", "identify " + self.settings[ "nickpass" ] )
+		if "nickpass" in self.data[ "settings" ]:
+			if self.data[ "settings" ][ "nickpass" ] != None and self.data[ "settings" ][ "nickpass" ] != "":
+				c.privmsg( "NickServ", "identify " + self.data[ "settings" ][ "nickpass" ] )
 	
 	def on_ctcp( self, c, e ):
 		nick = e.source.nick
@@ -83,7 +88,7 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 	
 	def on_all_raw_messages( self, c, e ):
 		self.processCommand( "on_all_raw_messages", c, e )
-	
+
 	def on_nicknameinuse( self, c, e ):
 		c.nick( c.get_nickname() + "_" )
 	
@@ -108,8 +113,10 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 						
 						if shouldBreak == True:
 							break
+
 		except Exception as Ex:
-			pass
+			print( traceback.format_exc() )
+			c.privmsg( "Spacecode", Ex )
 	
 	def reloadModules( self, printTarget = None ):
 		oldModnames = self.modulenames
@@ -126,7 +133,7 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 			
 			if module != "__init__":
 				if moduleExt == "py":
-					print "Loading module " + module
+					print( "Loading module '%s' ..." % module )
 					
 					if any( module in s for s in oldModnames ):
 						self.modules[ module ] = reload( oldMods[ module ] )
@@ -146,41 +153,45 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 		if printTarget != None:
 			self.notice( printTarget, "Reloaded %s modules and found %s new ones." % ( reloadedMods, newMods ) )
 
-if os.path.isfile( "startsettings.json" ):
-	print( "Config file detected" )
+if os.path.isfile( "data.json" ):
+	print( "Data file detected" )
 	
-	settingsFile = open( "startsettings.json",'r' )
-	settings = json.load( settingsFile )
-	settingsFile.close()
+	datafile = open( "data.json",'r' )
+	data = json.load( datafile )
+	datafile.close()
 
 else:
-	settings = {}
+	print( "No data file detected." )
 	
-	print "No config file detected."
+	data = {}
+	data[ "settings" ] = {}
+
+	data[ "settings" ][ "server" ] = raw_input( "Please enter the server to connect to: " )
+	data[ "settings" ][ "port" ] = raw_input( "Please enter the server port (leave blank for default): " )
+	data[ "settings" ][ "username" ] = raw_input( "Please enter the user name: ")
+	data[ "settings" ][ "password" ] = raw_input( "Please enter the server password (leave blank if none): " )
+	data[ "settings" ][ "nickname" ] = raw_input( "Enter the bots nick: ")
+	data[ "settings" ][ "nickpass" ] = raw_input( "Please enter the nickserv password (leave blank if none): " )
 	
-	settings[ "server" ] = raw_input( "Please enter the server to connect to: " )
-	settings[ "port" ] = raw_input( "Please enter the server port (leave blank for default): " )
-	settings[ "username" ] = raw_input( "Please enter the user name: ")
-	settings[ "password" ] = raw_input( "Please enter the server password (leave blank if none): " )
-	settings[ "nickname" ] = raw_input( "Enter the bots nick: ")
-	settings[ "nickpass" ] = raw_input( "Please enter the nickserv password (leave blank if none): " )
-	settings[ "lastfmapikey" ] = raw_input( "Please enter your last.fm api key: " )
+	if data[ "settings" ][ "port" ] == "":
+		data[ "settings" ][ "port" ] = "6667"
 	
-	if settings[ "port" ] == "":
-		settings[ "port" ] = "6667"
-	
-	configfile = open( "startsettings.json",'w' )
-	configfile.write( json.dumps( settings ) )
-	configfile.close()
+	datafile = open( "data.json",'w' )
+	datafile.write( json.dumps( data, sort_keys = True, indent = 4, separators = ( ",", ": " ) ) )
+	datafile.close()
 
 while True:
 	try:
-		bot = SpaceBot( settings )
+		bot = SpaceBot( data )
 		bot.start()
+	
 	except KeyboardInterrupt:
 		break
+	
 	except:
 		try:
-			print traceback.format_exc()
+			print( traceback.format_exc() )
+
 		except:
-			print "\nwhat the FUGG\n"
+			print( "\nwhat the FUGG\n" )
+

@@ -6,23 +6,20 @@ def on_module_loaded( self ):
 	return [ "isup" ]
 
 def on_privmsg( self, c, e ):
-	do_command( self, e, e.source.nick, e.arguments[ 0 ] )
+	do_command( self, e, e.source.nick )
 
 def on_pubmsg( self, c, e ):
-	do_command( self, e, e.target, e.arguments[ 0 ] )
+	do_command( self, e, e.target )
 
-def on_dccmsg( self, c, e ):
-	do_command( self, e, e.source, e.arguments[ 0 ] )
-	
-def do_command( self, e, target, arg ):
-	if arg[ 0 ] == '.':
-		cmdSplit = arg[ 1: ].split()
-		cmd = cmdSplit[ 0 ]
-		args = cmdSplit[ 1: ]
-		arg = " ".join( args )
+def do_command( self, e, target ):
+	arg = e.arguments[ 0 ]
+	argSplit = arg.split()
+
+	if argSplit[ 0 ] == ".reload":
+		arg = " ".join( argSplit[ 1: ] )
 		
-		if cmd == "reload":
-			if self.hasPermission( e.source.nick, str( e.target ), 100 ):
+		if e.source.nick == "Spacecode":
+			if self.hasPermission( e.source.nick, target, 100 ):
 				self.reloadModules( e.source.nick )
-			
-			return True
+		
+		return True

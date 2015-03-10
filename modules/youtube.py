@@ -13,39 +13,35 @@ def on_module_loaded( self ):
 	return [ "yt" ]
 
 def on_privmsg( self, c, e ):
-	do_command( self, e, e.source.nick, e.arguments[ 0 ] )
+	do_command( self, e, e.source.nick )
 
 def on_pubmsg( self, c, e ):
-	do_command( self, e, e.target, e.arguments[ 0 ] )
+	do_command( self, e, e.target )
 
-def on_dccmsg( self, c, e ):
-	do_command( self, e, e.source, e.arguments[ 0 ] )
-	
-def do_command( self, e, target, arg ):
-	if arg[ 0 ] == '.':
-		cmdSplit = arg[ 1: ].split()
-		cmd = cmdSplit[ 0 ]
-		args = cmdSplit[ 1: ]
-		arg = " ".join( args )
+def do_command( self, e, target ):
+	arg = e.arguments[ 0 ]
+	argSplit = arg.split()
+
+	if argSplit[ 0 ] == ".yt":
+		arg = " ".join( argSplit[ 1: ] )
 		
-		if cmd == "yt":
-			if self.hasPermission( e.source.nick, str( e.target ), 15 ):
-				url = "https://gdata.youtube.com/feeds/api/videos?q=%s&max-results=1&alt=json" % arg
-				
-				try:
-					ytjson = json.load( urllib.urlopen( url ) )
-					vidurl = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'id' ][ '$t' ] )
-					title  = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'title' ][ '$t' ] )
-					author = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'author' ][ 0 ][ 'name' ][ '$t' ] )
-					vidurl = "https://youtu.be/" + vidurl[ 42: ]
-					
-					self.privmsg( target, "\x02\"%s\"\x0F by %s - %s" % ( title, author, vidurl ) )
-				
-				except Exception as Ex:
-					print Ex
-					self.privmsg( target, "No results found." )
+		if self.hasPermission( e.source.nick, e.target, 15 ):
+			url = "https://gdata.youtube.com/feeds/api/videos?q=%s&max-results=1&alt=json" % arg
 			
-			return True
+			try:
+				ytjson = json.load( urllib.urlopen( url ) )
+				vidurl = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'id' ][ '$t' ] )
+				title  = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'title' ][ '$t' ] )
+				author = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'author' ][ 0 ][ 'name' ][ '$t' ] )
+				vidurl = "https://youtu.be/" + vidurl[ 42: ]
+				
+				self.privmsg( target, "\x02\"%s\"\x0F by %s - %s" % ( title, author, vidurl ) )
+			
+			except Exception as Ex:
+				print( Ex )
+				self.privmsg( target, "No results found." )
+		
+		return True
 	
 	else:
 		for match in youtubeRgx.finditer( arg ):
