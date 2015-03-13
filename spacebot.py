@@ -19,7 +19,6 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 		self.modulenames = []
 		self.modulecommands = []
 		self.reloadModules()
-		self._rfc_1459_command_regexp = re.compile( r"^(:(?P<prefix>[^ ]+) +)?(?P<command>[^ ]+)( *(?P<argument> .+))?" )
 		
 		irc.bot.SingleServerIRCBot.__init__(
 			self,
