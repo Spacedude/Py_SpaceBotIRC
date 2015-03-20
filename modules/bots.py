@@ -1,6 +1,5 @@
 # coding: utf-8
 
-import urllib
 from irc.client import NickMask
 
 def on_privmsg( self, c, e ):

@@ -2,7 +2,6 @@
 
 import json
 import os
-import copy
 from irc.client import NickMask
 
 def on_module_loaded( self ):
