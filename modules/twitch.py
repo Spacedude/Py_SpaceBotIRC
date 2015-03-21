@@ -101,10 +101,14 @@ def do_command( self, c, e, target ):
 					self.privmsg( target, "No non-ascii chars please" )
 				
 				else:
-					self.data[ "twitch" ][ e.source.nick ].append( argSplit[ 2 ] )
-					self.saveData()
+					if argSplit[ 2 ] in self.data[ "twitch" ][ e.source.nick ]:
+						self.privmsg( target, "You're already following %s" % argSplit[ 2 ] )
 
-					self.privmsg( target, "You'll now get pm'd when %s starts streaming" % argSplit[ 2 ] )
+					else:
+						self.data[ "twitch" ][ e.source.nick ].append( argSplit[ 2 ] )
+						self.saveData()
+
+						self.privmsg( target, "You'll now get pm'd when %s starts streaming" % argSplit[ 2 ] )
 		
 		elif argSplit[ 1 ] == "unfollow":
 			if e.source.nick in self.data[ "twitch" ]:
