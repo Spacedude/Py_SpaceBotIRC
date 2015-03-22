@@ -31,7 +31,7 @@ def do_command( self, e, target ):
 			
 			else:
 				self.privmsg( target, "No help available for '" + 
-					argSplit[ 2 ] + "'.'" )
+					argSplit[ 1 ] + "'.'" )
 
 		else:
 			self.privmsg( target, "Available commands: " + 
