@@ -7,7 +7,7 @@ def on_module_loaded( self ):
 	return {
 		"decide": {
 			"description": "Gives a random decision from the given choices.",
-			"syntax": ".decide <choice> or <choice>[ or <choice>\x09etc.\x0f]"
+			"syntax": ".decide <choice> or <choice> [or <choice>\x09etc.\x0f]"
 		}
 	}
 

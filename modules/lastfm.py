@@ -103,7 +103,7 @@ def on_module_loaded( self ):
 	return {
 		"np": {
 			"description": "Display what you or someone else is currently listening to.",
-			"syntax": ".np[ <nick|last.fm username>]"
+			"syntax": ".np [nick|last.fm username]"
 		},
 		"wp": {
 			"description": "Display what everyone in the channel is currently listening to.",
@@ -115,7 +115,7 @@ def on_module_loaded( self ):
 		},
 		"compare": {
 			"description": "Compare how similar two people's music taste is.",
-			"syntax": ".compare <nick|last.fm account>[ <nick|last.fm account>]"
+			"syntax": ".compare <nick|last.fm account> [nick|last.fm account]"
 		}
 	}
 

@@ -6,7 +6,7 @@ def on_module_loaded( self ):
     return {
 		"help": {
 			"description": "It's help, DUH!",
-			"syntax": ".help [<command>]"
+			"syntax": ".help [command]"
 		}
 	}
 
@@ -30,12 +30,13 @@ def do_command( self, e, target ):
 				)
 			
 			else:
-				self.privmsg( target, "Unknown command." )
+				self.privmsg( target, "No help available for '" + 
+					argSplit[ 2 ] + "'.'" )
 
 		else:
 			self.privmsg( target, "Available commands: " + 
-			", ".join( self.help.keys() ) + 
-			". For more information type \x03.help <command>\x0f." )
+				", ".join( self.help.keys() ) + 
+				". For more information type \x03.help <command>\x0f." )
 		
 		return True
 

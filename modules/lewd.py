@@ -11,7 +11,7 @@ def on_module_loaded( self ):
 	return {
 		"lewd": {
 			"description": "Give people 'lewd' points or display yours.",
-			"syntax": ".lewd[ <nick>]"
+			"syntax": ".lewd [nick]"
 		}
 	}
 

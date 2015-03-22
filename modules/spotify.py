@@ -11,7 +11,7 @@ def on_module_loaded( self ):
 	return {
 		"spotify": {
 			"description": "Output a spotify link to the song you or the specifified person is curently playing.",
-			"syntax": ".spotify[ <nick>]"
+			"syntax": ".spotify [nick]"
 		}
 	}
 
