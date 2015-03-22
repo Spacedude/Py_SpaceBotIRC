@@ -3,7 +3,7 @@
 from irc.client import NickMask
 
 def on_module_loaded( self ):
-	return [ "isup" ]
+	return {} # We don't want this listed.
 
 def on_privmsg( self, c, e ):
 	do_command( self, e, e.source.nick )
@@ -23,3 +23,4 @@ def do_command( self, e, target ):
 				self.reloadModules( e.source.nick )
 		
 		return True
+

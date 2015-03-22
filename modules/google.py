@@ -9,7 +9,12 @@ from irc.client import NickMask
 htmlparser = HTMLParser.HTMLParser()
 
 def on_module_loaded( self ):
-	return [ "g" ]
+	return {
+		"g": {
+			"description": "Search for a certain string on google",
+			"syntax": ".g <string>"
+		}
+	}
 
 def on_privmsg( self, c, e ):
 	do_command( self, e, e.source.nick )

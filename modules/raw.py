@@ -3,7 +3,7 @@
 from irc.client import NickMask
 
 def on_module_loaded( self ):
-	return [] # We don't want this listed in the available commands
+	return {} # We don't want this listed in the available commands
 
 def on_privmsg( self, c, e ):
 	do_command( self, e, e.source.nick )
@@ -24,3 +24,4 @@ def do_command( self, e, target ):
 					self.connection.send_raw( arg )
 			
 		return True
+

@@ -8,7 +8,12 @@ def on_module_loaded( self ):
 	if not "lewd" in self.data:
 		self.data[ "lewd" ] = {}
 	
-	return [ "lewd" ]
+	return {
+		"lewd": {
+			"description": "Give people 'lewd' points or display yours.",
+			"syntax": ".lewd[ <nick>]"
+		}
+	}
 
 def on_privmsg( self, c, e ):
 	do_command( self, e, e.source.nick )

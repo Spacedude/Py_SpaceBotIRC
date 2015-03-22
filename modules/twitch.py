@@ -25,7 +25,12 @@ def on_module_loaded( self ):
 	self.twitchthread.setDaemon( True )
 	self.twitchthread.start()
 
-	return [ "twitch" ]
+	return {
+		"twitch": {
+			"description": "Follow or get infos about twitch channels.",
+			"syntax": ".twitch <live|follow|unfollow> <channel>"
+		}
+	}
 
 def on_privmsg( self, c, e ):
 	do_command( self, c, e, e.source.nick )

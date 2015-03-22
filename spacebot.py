@@ -17,7 +17,7 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 		self.data = data
 		self.modules = {}
 		self.modulenames = []
-		self.modulecommands = []
+		self.help = {}
 		self.reloadModules()
 		
 		irc.bot.SingleServerIRCBot.__init__(
@@ -144,8 +144,9 @@ class SpaceBot( irc.bot.SingleServerIRCBot ):
 						newMods += 1
 					
 					if hasattr( self.modules[ module ], "on_module_loaded" ):
-						c_modulecommands = getattr( self.modules[ module ], "on_module_loaded" )( self )
-						self.modulecommands = list( set( c_modulecommands + self.modulecommands ) )
+						c_help = getattr( self.modules[ module ], "on_module_loaded" )( self )
+						#self.help = list( set( self.help + c_help ) )
+						self.help.update( c_help )
 					
 					self.modulenames.append( module )
 		

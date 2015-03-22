@@ -10,7 +10,12 @@ htmlparser = HTMLParser.HTMLParser()
 youtubeRgx = re.compile( r"http(?:s?)://(?:www\.)?youtu(?:be\.com/watch\?v=|\.be/)([\w\-]+)(&(amp;)?[\w\?=‌​]*)?" )
 
 def on_module_loaded( self ):
-	return [ "yt" ]
+	return {
+		"yt": {
+			"description": "Search for a certain string on YouTube.",
+			"syntax": ".yt <string>"
+		}
+	}
 
 def on_privmsg( self, c, e ):
 	do_command( self, e, e.source.nick )
@@ -56,3 +61,4 @@ def do_command( self, e, target ):
 				
 				except Exception as Ex:
 					print Ex
+

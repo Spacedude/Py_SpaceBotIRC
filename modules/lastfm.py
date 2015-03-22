@@ -100,7 +100,24 @@ def on_module_loaded( self ):
 		self.data[ "lastfm" ][ "apikey" ] = raw_input( "Please enter your last.fm api key: " )
 		self.saveData()
 
-	return [ "np", "wp", "account", "compare" ]
+	return {
+		"np": {
+			"description": "Display what you or someone else is currently listening to.",
+			"syntax": ".np[ <nick|last.fm username>]"
+		},
+		"wp": {
+			"description": "Display what everyone in the channel is currently listening to.",
+			"syntax": ".wp"
+		},
+		"account": {
+			"description": "Link a last.fm account to your nick.",
+			"syntax": ".account <last.fm account name>"
+		},
+		"compare": {
+			"description": "Compare how similar two people's music taste is.",
+			"syntax": ".compare <nick|last.fm account>[ <nick|last.fm account>]"
+		}
+	}
 
 def on_privmsg( self, c, e ):
 	do_command( self, e, e.source.nick )

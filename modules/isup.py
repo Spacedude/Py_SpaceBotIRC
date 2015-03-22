@@ -4,7 +4,12 @@ import urllib
 from irc.client import NickMask
 
 def on_module_loaded( self ):
-	return [ "isup" ]
+	return {
+		"isup": {
+			"description": "Checks if the given website is up or not.",
+			"syntax": ".isup <url>"
+		}
+	}
 
 def on_privmsg( self, c, e ):
 	do_command( self, e, e.source.nick )

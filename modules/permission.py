@@ -8,7 +8,12 @@ def on_module_loaded( self ):
 	if not "permissions" in self.data:
 		self.data[ "permission" ] = {}
 	
-	return [ "permission" ]
+	return {
+		"permission": {
+			"description": "Sets or gets permissions of a person.",
+			"syntax": ".permission <set|get> <power>"
+		}
+	}
 
 def on_pubmsg( self, c, e ):
 	arg = e.arguments[ 0 ]
@@ -39,3 +44,4 @@ def on_pubmsg( self, c, e ):
 			pass
 		
 		return True
+

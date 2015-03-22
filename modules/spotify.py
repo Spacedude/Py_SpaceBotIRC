@@ -8,7 +8,12 @@ from irc.client import NickMask
 htmlparser = HTMLParser.HTMLParser()
 
 def on_module_loaded( self ):
-	return [ "spotify" ]
+	return {
+		"spotify": {
+			"description": "Output a spotify link to the song you or the specifified person is curently playing.",
+			"syntax": ".spotify[ <nick>]"
+		}
+	}
 
 def on_privmsg( self, c, e ):
 	do_command( self, e, e.source.nick )
@@ -62,3 +67,4 @@ def do_command( self, e, target ):
 							pass
 			
 		return True
+
