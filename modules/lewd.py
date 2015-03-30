@@ -15,9 +15,6 @@ def on_module_loaded( self ):
 		}
 	}
 
-def on_privmsg( self, c, e ):
-	do_command( self, e, e.source.nick )
-
 def on_pubmsg( self, c, e ):
 	do_command( self, e, e.target )
 
@@ -32,20 +29,26 @@ def do_command( self, e, target ):
 			if argSplit[ 1 ] == e.source.nick or arg == "":
 				if argSplit[ 1 ] in self.data[ "lewd" ]:
 					self.privmsg( target, "Lewdness for %s: %s" % ( argSplit[ 1 ], self.data[ "lewd" ][ argSplit[ 1 ] ] ) )
+
 				else:
 					self.privmsg( target, argSplit[ 1 ] + " is 100% pure." )
 			
 			else:
-				if argSplit[ 1 ] in self.data[ "lewd" ]:
-					c_lewd = self.data[ "lewd" ][ argSplit[ 1 ] ] + 1
+				if argSplit[ 1 ].lower() == "obama":
+					self.connection.kick( target, e.source.nick, "THANKS OBAMA" )
+				
 				else:
-					c_lewd = 1
+					if argSplit[ 1 ] in self.data[ "lewd" ]:
+						c_lewd = self.data[ "lewd" ][ argSplit[ 1 ] ] + 1
+					
+					else:
+						c_lewd = 1
 				
-				self.data[ "lewd" ][ argSplit[ 1 ] ] = c_lewd
-				
-				self.saveData()
-				
-				self.privmsg( target, "Lewdness for %s: %s" % ( argSplit[ 1 ], c_lewd ) )
+					self.data[ "lewd" ][ argSplit[ 1 ] ] = c_lewd
+					
+					self.saveData()
+					
+					self.privmsg( target, "Lewdness for %s: %s" % ( argSplit[ 1 ], c_lewd ) )
 		
 		return True
 
