@@ -1,15 +1,30 @@
 # coding: utf-8
 
 import re
-import urllib
-import json
-import HTMLParser
 from irc.client import NickMask
+from apiclient.discovery import build
+from optparse import OptionParser
 
-htmlparser = HTMLParser.HTMLParser()
 youtubeRgx = re.compile( r"http(?:s?)://(?:www\.)?youtu(?:be\.com/watch\?v=|\.be/)([\w\-]+)(&(amp;)?[\w\?=‌​]*)?" )
+youtube = None
+parser = OptionParser()
+parser.add_option( "--q", dest = "q", default = "" )
+parser.add_option( "--max-results", dest = "maxResults", default = 1 )
+( parseroptions, _args ) = parser.parse_args()
 
 def on_module_loaded( self ):
+	global youtube
+
+	if not "youtube" in self.data:
+		self.data[ "youtube" ] = {}
+	
+	if not "apikey" in self.data[ "youtube" ]:
+		self.data[ "youtube" ][ "apikey" ] = raw_input( "Please enter your google api key: " )
+		self.saveData()
+	
+	if "apikey" in self.data[ "youtube" ]:
+		youtube = build( "youtube", "v3", developerKey = self.data[ "youtube" ][ "apikey" ] )
+	
 	return {
 		"yt": {
 			"description": "Search for a certain string on YouTube.",
@@ -31,17 +46,36 @@ def do_command( self, e, target ):
 		arg = " ".join( argSplit[ 1: ] )
 		
 		if self.hasPermission( e.source.nick, e.target, 15 ):
-			url = "https://gdata.youtube.com/feeds/api/videos?q=%s&max-results=1&alt=json" % arg
-			
 			try:
-				ytjson = json.load( urllib.urlopen( url ) )
-				vidurl = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'id' ][ '$t' ] )
-				title  = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'title' ][ '$t' ] )
-				author = htmlparser.unescape( ytjson[ 'feed' ][ 'entry' ][ 0 ][ 'author' ][ 0 ][ 'name' ][ '$t' ] )
-				vidurl = "https://youtu.be/" + vidurl[ 42: ]
+				parseroptions.q = arg
+
+				search_response = youtube.search().list(
+					q = parseroptions.q,
+					part = "id,snippet",
+					type = "video",
+					maxResults = parseroptions.maxResults
+				).execute()
 				
-				self.privmsg( target, "\x02\"%s\"\x0F by %s - %s" % ( title, author, vidurl ) )
-			
+				for search_result in search_response.get( "items", [] ):
+					if search_result[ "id" ][ "kind" ] == "youtube#video":
+						title = search_result[ "snippet" ][ "title" ]
+						vidurl = "https://youtu.be/" + search_result[ "id" ][ "videoId" ]
+						
+						video_response = youtube.videos().list(
+							id = search_result[ "id" ][ "videoId" ],
+							part = "id,snippet",
+							maxResults = 1,
+						).execute()
+
+						for video_result in video_response.get( "items", [] ):
+							uploader = video_result[ "snippet" ][ "channelTitle" ]
+						
+							self.privmsg( target, "\x02\"%s\"\x0F by %s - %s" % ( title, uploader, vidurl ) )
+
+							break
+						
+						break
+
 			except Exception as Ex:
 				print( Ex )
 				self.privmsg( target, "No results found." )
@@ -52,13 +86,20 @@ def do_command( self, e, target ):
 		for match in youtubeRgx.finditer( arg ):
 			if match:
 				try:
-					url = 'http://gdata.youtube.com/feeds/api/videos/%s?alt=json&v=2' % match.group( 1 )
-					ytjson = json.load( urllib.urlopen( url ) )
-					title = ytjson[ 'entry' ][ 'title' ][ '$t' ]
-					author = ytjson[ 'entry' ][ 'author' ][ 0 ][ 'name' ][ '$t' ]
-					
-					self.privmsg( target, "\x02\"%s\"\x0F by %s" % ( title, author ) )
-				
+					video_response = youtube.videos().list(
+						id = match.group( 1 ),
+						part = "id,snippet",
+						maxResults = parseroptions.maxResults,
+					).execute()
+
+					for video_result in video_response.get( "items", [] ):
+						title = video_result[ "snippet" ][ "title" ]
+						uploader = video_result[ "snippet" ][ "channelTitle" ]
+						
+						self.privmsg( target, "\x02\"%s\"\x0F by %s" % ( title, uploader ) )
+
+						break
+
 				except Exception as Ex:
 					print Ex
 
