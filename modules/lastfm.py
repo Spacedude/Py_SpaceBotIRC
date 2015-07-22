@@ -199,11 +199,15 @@ def do_command( self, e, target ):
 					
 					score = int( float( result[ "score" ] ) * 100 )
 					
-					artists = result[ "artists" ][ "artist" ]
-					artistsString = ""
+					try:
+						artists = result[ "artists" ][ "artist" ]
+						artistsString = ""
+					
+						for artist in artists:
+							artistsString = artistsString + ", " + artist[ "name" ]
 
-					for artist in artists:
-						artistsString = artistsString + ", " + artist[ "name" ]
+					except:
+						artistsString = "  no artists"
 					
 					self.privmsg( target, "Comparison of %s and %s: %s/100 featuring %s" % ( duser1, duser2, score, artistsString[ 2: ] ) )
 				
